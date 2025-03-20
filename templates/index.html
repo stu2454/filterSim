@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Benchmark vs. Percentile Filtering</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+</head>
+<body>
+    <h2>Compare Benchmark-Based and Percentile-Based Filtering</h2>
+
+    <!-- User input for percentile selection -->
+    <h3>Set Percentile Range for Filtering</h3>
+    <label for="lower_percentile">Lower Percentile (%): </label>
+    <input type="number" id="lower_percentile" value="10" min="0" max="100">
+    
+    <label for="upper_percentile">Upper Percentile (%): </label>
+    <input type="number" id="upper_percentile" value="85" min="0" max="100">
+    
+    <button onclick="compareFilters()">Compare Benchmark vs Percentile</button>
+
+    <!-- Output Area -->
+    <h3>Unfiltered Distribution</h3>
+    <div id="chart_original"></div>
+
+    <h3>Benchmark-Based Filtering (10%-180%)</h3>
+    <div id="chart_benchmark"></div>
+
+    <h3>Percentile-Based Filtering</h3>
+    <div id="chart_percentile"></div>
+
+    <p id="count"></p>
+
+    <script>
+        function compareFilters() {
+            let lower = parseInt(document.getElementById("lower_percentile").value);
+            let upper = parseInt(document.getElementById("upper_percentile").value);
+
+            $.ajax({
+                url: "/compare",
+                type: "POST",
+                contentType: "application/json",
+                data: JSON.stringify({ lower_percentile: lower, upper_percentile: upper }),
+                success: function(response) {
+                    $("#chart_original").html(response.graph_original);
+                    $("#chart_benchmark").html(response.graph_benchmark);
+                    $("#chart_percentile").html(response.graph_percentile);
+                    $("#count").html(
+                        `Benchmark-Based Count: ${response.benchmark_count}<br>
+                         Percentile-Based Count: ${response.percentile_count}<br>
+                         Used Percentiles: P${response.lower_percentile} - P${response.upper_percentile}`
+                    );
+                }
+            });
+        }
+    </script>
+</body>
+</html>
+
